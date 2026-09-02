@@ -4,6 +4,7 @@
 
 #include "Core/RenderPipelinePhaseActor.h"
 #include "Core/RenderPipelinePhaseRegistry.h"
+#include "Core/RenderPipelineLabPlayerController.h"
 #include "Engine/World.h"
 #include "HAL/IConsoleManager.h"
 #include "HAL/PlatformMisc.h"
@@ -14,6 +15,7 @@ ARenderPipelineLabGameMode::ARenderPipelineLabGameMode()
 {
 	DefaultPawnClass = nullptr;
 	HUDClass = nullptr;
+	PlayerControllerClass = ARenderPipelineLabPlayerController::StaticClass();
 }
 
 void ARenderPipelineLabGameMode::BeginPlay()

@@ -45,6 +45,8 @@ $env:PIX_TOOL_PATH = 'C:\Program Files\Microsoft PIX\2603.25\pixtool.exe'
 
 NullRHI 只验证 CPU 与组件合同。Viewport、Shadow Pass、Shader 和 GPU 资源由 D3D12 运行与 GPU Capture 验证。
 
+Debug Game 使用实验专用 Player Controller：鼠标指针保持可见，Viewport Capture 为 `NoCapture`，Mouse Lock 为 `DoNotLock`，便于在游戏窗口与 VS 之间切换和下断点。
+
 ## 运行 Phase
 
 ```powershell
