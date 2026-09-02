@@ -297,6 +297,7 @@ r.DynamicGlobalIlluminationMethod
 r.ReflectionMethod
 r.GenerateMeshDistanceFields
 r.AllowStaticLighting
+sg.ResolutionQuality
 sg.ViewDistanceQuality
 sg.AntiAliasingQuality
 sg.ShadowQuality
@@ -310,7 +311,7 @@ sg.ShadingQuality
 sg.LandscapeQuality
 ```
 
-The Phase1 evidence baseline expects each supported quality group above to report `3` (Epic). Missing groups are logged as missing and reviewed against the UE 5.8.1 platform configuration rather than treated as an implicit pass.
+The Phase1 evidence baseline expects `sg.ResolutionQuality=100` and every other supported quality group above to report `3` (Epic). Missing groups are logged as missing and reviewed against the UE 5.8.1 platform configuration rather than treated as an implicit pass.
 
 ## 10. Evidence workflow
 
@@ -347,6 +348,8 @@ Base Pass
 The capture records actual Event hierarchy, Shader permutation, GBuffer, Scene Depth, Shadow Depth, Shadow Mask, Deferred Light inputs, and Scene Color before/after contribution at the fixed target pixel.
 
 GPU Capture is the evidence for actual Pass, Shader, and resource execution. Source `RDG_EVENT_NAME` strings are only source facts.
+
+After both captures pass, observed evidence is recorded in `docs/phase1-direct-lighting.md` and synchronized back to the runtime-evidence sections of the Obsidian `041` and `060` Trace Cards. Capture binaries stay local; only textual evidence is committed.
 
 ## 11. Tests and verification
 
@@ -387,6 +390,7 @@ The migration preserves reviewable history:
 
 ```text
 docs: add RenderPipelineLab monorepo design
+docs: add RenderPipelineLab implementation plan
 chore: archive original render pipeline probe
 refactor: rename project and add phase registry
 feat: add phase1 direct lighting experiment
@@ -469,8 +473,9 @@ The implementation is complete only when:
 11. Phase0 smoke verification passes.
 12. Phase1 Shadow On and Shadow Off D3D12 runtime verification passes.
 13. Two GPU captures confirm the expected Standard Deferred and Local Projected Shadow resource chains.
-14. Generated outputs, captures, credentials, and generated security tokens are excluded from Git history.
-15. GitHub `main` matches the locally verified commit.
+14. The observed Shadow On/Off evidence is synchronized to the `041` and `060` Trace Cards without merging source facts and runtime observations.
+15. Generated outputs, captures, credentials, and generated security tokens are excluded from Git history.
+16. GitHub `main` matches the locally verified commit.
 
 ## 16. Implementation boundary
 
