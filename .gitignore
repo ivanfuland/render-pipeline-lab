@@ -1,0 +1,13 @@
+.vs/
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+*.sln
+*.slnx
+*.pdb
+*.wpix
+*.rdc
+*.ngfx-capture
+Build/Windows/FileOpenOrder/
+Content/Developers/
