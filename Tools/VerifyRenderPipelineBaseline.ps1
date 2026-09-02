@@ -6,6 +6,21 @@ param(
 
 $engineIni = Join-Path $ProjectRoot 'Config\DefaultEngine.ini'
 $content = Get-Content -Raw -LiteralPath $engineIni
+$requiredFiles = @(
+    'RenderPipelineLab.uproject',
+    'Source\RenderPipelineLab.Target.cs',
+    'Source\RenderPipelineLabEditor.Target.cs',
+    'Source\RenderPipelineLab\RenderPipelineLab.Build.cs'
+)
+$missingFiles = $requiredFiles | Where-Object {
+    -not (Test-Path -LiteralPath (Join-Path $ProjectRoot $_))
+}
+if ($missingFiles.Count -gt 0)
+{
+    $missingFiles | ForEach-Object { Write-Error "Missing project file: $_" }
+    exit 1
+}
+
 $requiredSettings = @(
     'r.ForwardShading=False',
     'r.Nanite.ProjectEnabled=False',
@@ -22,7 +37,7 @@ $requiredSettings = @(
     'DefaultGraphicsRHI=DefaultGraphicsRHI_DX12',
     '+D3D12TargetedShaderFormats=PCD3D_SM6',
     'GameDefaultMap=/Engine/Maps/Entry',
-    'GlobalDefaultGameMode=/Script/test.RenderPipelineProbeGameMode'
+    'GlobalDefaultGameMode=/Script/RenderPipelineLab.RenderPipelineLabGameMode'
 )
 
 $missing = $requiredSettings | Where-Object { $content -notmatch [regex]::Escape($_) }
@@ -35,7 +50,7 @@ if ($missing.Count -gt 0)
 if ($LogPath)
 {
     $log = Get-Content -Raw -LiteralPath $LogPath
-    foreach ($pattern in @('Using Forced RHI: D3D12', 'PCD3D_SM6', 'RenderPipelineProbe baseline'))
+    foreach ($pattern in @('Using Forced RHI: D3D12', 'PCD3D_SM6', 'RenderPipelineLab baseline'))
     {
         if ($log -notmatch [regex]::Escape($pattern))
         {

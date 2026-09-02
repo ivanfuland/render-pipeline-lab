@@ -48,6 +48,22 @@ foreach ($relative in $relativeFiles) {
         if ($content -match $secretPattern) {
             $failures.Add("Sensitive content: $relative")
         }
+
+        if ($extension -eq '.uproject') {
+            try {
+                $project = $content | ConvertFrom-Json -ErrorAction Stop
+                $androidFileServer = @($project.Plugins) | Where-Object {
+                    $_.Name -eq 'AndroidFileServer'
+                } | Select-Object -First 1
+                if (-not $androidFileServer -or $androidFileServer.Enabled -ne $false) {
+                    $failures.Add(
+                        "AndroidFileServer must be explicitly disabled: $relative")
+                }
+            }
+            catch {
+                $failures.Add("Invalid uproject JSON: $relative")
+            }
+        }
     }
 }
 

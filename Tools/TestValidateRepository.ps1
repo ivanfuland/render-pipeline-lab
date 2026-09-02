@@ -52,6 +52,21 @@ try {
     if ((Invoke-ValidatorProcess -Root $resolvedTemp) -eq 0) {
         throw 'Credential fixture unexpectedly passed.'
     }
+
+    Remove-Item -LiteralPath (Join-Path $resolvedTemp 'DefaultEngine.ini') -Force
+    $unsafeProject = @'
+{
+  "FileVersion": 3,
+  "Plugins": [
+    { "Name": "AndroidFileServer", "Enabled": true }
+  ]
+}
+'@
+    Set-Content -LiteralPath (Join-Path $resolvedTemp 'Unsafe.uproject') `
+        -Value $unsafeProject
+    if ((Invoke-ValidatorProcess -Root $resolvedTemp) -eq 0) {
+        throw 'Enabled AndroidFileServer fixture unexpectedly passed.'
+    }
 }
 finally {
     if (Test-Path -LiteralPath $resolvedTemp) {

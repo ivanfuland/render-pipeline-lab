@@ -1,18 +1,18 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "Misc/AutomationTest.h"
-#include "RenderPipelineProbeActor.h"
+#include "Phases/Phase0_StaticBox/Phase0StaticBoxActor.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/World.h"
 #include "Materials/MaterialInterface.h"
 #include "UObject/GarbageCollection.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
-	FRenderPipelineProbeActorLifecycleTest,
-	"Project.RenderPipelineProbe.ActorLifecycle",
+	FPhase0StaticBoxActorLifecycleTest,
+	"Project.RenderPipelineLab.Phase0.ActorLifecycle",
 	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
-bool FRenderPipelineProbeActorLifecycleTest::RunTest(const FString& Parameters)
+bool FPhase0StaticBoxActorLifecycleTest::RunTest(const FString& Parameters)
 {
 	UWorld* TestWorld = UWorld::CreateWorld(
 		EWorldType::Game,
@@ -25,9 +25,16 @@ bool FRenderPipelineProbeActorLifecycleTest::RunTest(const FString& Parameters)
 	}
 	TestWorld->AddToRoot();
 
-	ARenderPipelineProbeActor* Probe =
-		TestWorld->SpawnActor<ARenderPipelineProbeActor>();
+	APhase0StaticBoxActor* Probe =
+		TestWorld->SpawnActor<APhase0StaticBoxActor>();
 	TestNotNull(TEXT("Probe actor spawned"), Probe);
+	if (!Probe)
+	{
+		TestWorld->RemoveFromRoot();
+		TestWorld->DestroyWorld(false);
+		return false;
+	}
+	TestEqual(TEXT("Phase ID"), Probe->GetPhaseId(), FName(TEXT("Phase0")));
 	TestNotNull(TEXT("Probe mesh exists"), Probe->GetProbeMesh());
 	TestTrue(
 		TEXT("Probe enables the dynamic mesh draw gate"),

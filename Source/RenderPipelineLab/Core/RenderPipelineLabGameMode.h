@@ -4,15 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "RenderPipelineProbeGameMode.generated.h"
+#include "RenderPipelineLabGameMode.generated.h"
 
 UCLASS()
-class TEST_API ARenderPipelineProbeGameMode : public AGameModeBase
+class RENDERPIPELINELAB_API ARenderPipelineLabGameMode
+	: public AGameModeBase
 {
 	GENERATED_BODY()
 
 public:
-	ARenderPipelineProbeGameMode();
+	ARenderPipelineLabGameMode();
 
 protected:
 	virtual void BeginPlay() override;

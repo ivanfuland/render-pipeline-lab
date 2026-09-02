@@ -3,13 +3,13 @@
 using UnrealBuildTool;
 using System.Collections.Generic;
 
-public class testEditorTarget : TargetRules
+public class RenderPipelineLabEditorTarget : TargetRules
 {
-	public testEditorTarget( TargetInfo Target) : base(Target)
+	public RenderPipelineLabEditorTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Editor;
 		DefaultBuildSettings = BuildSettingsVersion.V7;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_8;
-		ExtraModuleNames.Add("test");
+		ExtraModuleNames.Add("RenderPipelineLab");
 	}
 }

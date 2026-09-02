@@ -2,15 +2,19 @@
 	"FileVersion": 3,
 	"EngineAssociation": "{FA62D087-46FC-3099-23CA-1085715EFF39}",
 	"Category": "",
-	"Description": "",
+	"Description": "Reproducible UE renderer experiments organized as phases.",
 	"Modules": [
 		{
-			"Name": "test",
+			"Name": "RenderPipelineLab",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [
+		{
+			"Name": "AndroidFileServer",
+			"Enabled": false
+		},
 		{
 			"Name": "ModelingToolsEditorMode",
 			"Enabled": true,

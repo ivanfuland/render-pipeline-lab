@@ -2,9 +2,8 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
-#include "RenderPipelineProbeActor.generated.h"
+#include "Core/RenderPipelinePhaseActor.h"
+#include "Phase0StaticBoxActor.generated.h"
 
 class UCameraComponent;
 class UDirectionalLightComponent;
@@ -13,17 +12,20 @@ class USceneComponent;
 class UStaticMesh;
 class UStaticMeshComponent;
 
-DECLARE_LOG_CATEGORY_EXTERN(LogRenderPipelineProbe, Log, All);
-
 UCLASS()
-class TEST_API ARenderPipelineProbeActor : public AActor
+class RENDERPIPELINELAB_API APhase0StaticBoxActor final
+	: public ARenderPipelinePhaseActor
 {
 	GENERATED_BODY()
 
 public:
-	ARenderPipelineProbeActor();
+	APhase0StaticBoxActor();
 
 	virtual void BeginPlay() override;
+	virtual FName GetPhaseId() const override
+	{
+		return FName(TEXT("Phase0"));
+	}
 
 	void ToggleProbeTransform();
 	void RebuildProbeRenderState();
@@ -35,7 +37,6 @@ public:
 
 private:
 	void ConfigureProbeMesh(UStaticMeshComponent& MeshComponent);
-	void TriggerPixCapture();
 
 	UPROPERTY()
 	TObjectPtr<USceneComponent> SceneRoot;
@@ -57,5 +58,4 @@ private:
 
 	int32 ProbeGeneration = 1;
 	bool bProbeAtOffset = false;
-	FTimerHandle PixCaptureTimer;
 };

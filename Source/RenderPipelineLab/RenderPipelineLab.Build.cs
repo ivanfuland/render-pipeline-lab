@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class test : ModuleRules
+public class RenderPipelineLab : ModuleRules
 {
-	public test(ReadOnlyTargetRules Target) : base(Target)
+	public RenderPipelineLab(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		PrivateIncludePaths.Add(ModuleDirectory);

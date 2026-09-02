@@ -270,6 +270,14 @@ Use `apply_patch` to remove the entire section beginning with:
 
 through its `ManualIPAddress=` line from `Config/DefaultEngine.ini`. Do not copy the existing token into a backup inside the repository.
 
+Also add this entry to the `.uproject` Plugins array before launching Editor again:
+
+```json
+{ "Name": "AndroidFileServer", "Enabled": false }
+```
+
+The plugin is `EnabledByDefault=true`; its Editor settings object writes a generated token back to `DefaultEngine.ini` during startup unless the plugin is explicitly disabled.
+
 Run:
 
 ```powershell

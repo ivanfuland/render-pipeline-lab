@@ -399,7 +399,7 @@ ci: add repository validation
 
 The design commit is reviewed before implementation. The first implementation commit records the original source/configuration/tooling baseline without generated files. The rename commit then allows Git to detect project and module renames.
 
-Because the remote repository is Public, the baseline commit is a sanitized baseline. Before any project file is staged, the Android File Server `SecurityToken` currently present in `Config\DefaultEngine.ini` is removed and the related local-only settings are reviewed. The original generated token is never committed, even temporarily, because deleting it in a later commit would not remove it from Git history.
+Because the remote repository is Public, the baseline commit is a sanitized baseline. Before any project file is staged, the Android File Server `SecurityToken` currently present in `Config\DefaultEngine.ini` is removed and `AndroidFileServer` is explicitly disabled in the `.uproject`. The Engine plugin is enabled by default and its Editor module regenerates a token during startup unless disabled. The original or regenerated token is never committed, even temporarily, because deleting it in a later commit would not remove it from Git history.
 
 Tracked content includes:
 

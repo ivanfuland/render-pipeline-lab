@@ -7,7 +7,7 @@
 固定基线：
 
 - UE 5.8.1 源码版：`H:\Unreal\UnrealEngine`
-- 工程：`H:\Unreal\Workspace\test`
+- 工程：`H:\Unreal\Workspace\RenderPipelineLab`
 - DX12、SM6、Deferred Shading
 - Nanite、Lumen、Hardware Ray Tracing、Substrate、VSM、Static Lighting 关闭
 - Auto Exposure 和 Bloom 关闭
@@ -18,14 +18,14 @@
 
 ```powershell
 & 'H:\Unreal\UnrealEngine\Engine\Build\BatchFiles\Build.bat' `
-  testEditor Win64 Development `
-  'H:\Unreal\Workspace\test\test.uproject' `
+  RenderPipelineLabEditor Win64 Development `
+  'H:\Unreal\Workspace\RenderPipelineLab\RenderPipelineLab.uproject' `
   -WaitMutex -NoHotReloadFromIDE
 ```
 
 ```powershell
 & 'H:\Unreal\UnrealEngine\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' `
-  'H:\Unreal\Workspace\test\test.uproject' `
+  'H:\Unreal\Workspace\RenderPipelineLab\RenderPipelineLab.uproject' `
   -Unattended -NoSplash -NullRHI `
   '-ExecCmds=Automation RunTests Project.RenderPipelineProbe;Quit' `
   '-TestExit=Automation Test Queue Empty' `
@@ -44,7 +44,7 @@ Test Completed. Result={Success} Name={ActorLifecycle}
 $DemoProcess = Start-Process `
   -FilePath 'H:\Unreal\UnrealEngine\Engine\Binaries\Win64\UnrealEditor.exe' `
   -ArgumentList @(
-    'H:\Unreal\Workspace\test\test.uproject',
+    'H:\Unreal\Workspace\RenderPipelineLab\RenderPipelineLab.uproject',
     '-game',
     '-dx12',
     '-windowed',
@@ -59,14 +59,14 @@ $DemoProcess = Start-Process `
 $DemoProcess.Id
 ```
 
-运行日志：`H:\Unreal\Workspace\test\Saved\Logs\RenderPipelineLab.log`。
+运行日志：`H:\Unreal\Workspace\RenderPipelineLab\Saved\Logs\RenderPipelineLab.log`。
 
 基线检查：
 
 ```powershell
-& 'H:\Unreal\Workspace\test\Tools\VerifyRenderPipelineBaseline.ps1' `
-  -ProjectRoot 'H:\Unreal\Workspace\test' `
-  -LogPath 'H:\Unreal\Workspace\test\Saved\Logs\RenderPipelineLab.log'
+& 'H:\Unreal\Workspace\RenderPipelineLab\Tools\VerifyRenderPipelineBaseline.ps1' `
+  -ProjectRoot 'H:\Unreal\Workspace\RenderPipelineLab' `
+  -LogPath 'H:\Unreal\Workspace\RenderPipelineLab\Saved\Logs\RenderPipelineLab.log'
 ```
 
 ## 输入动作
@@ -148,7 +148,7 @@ RenderDoc 与 Visual Studio、Nsight 分开运行。
 $DemoProcess = Start-Process `
   -FilePath 'H:\Unreal\UnrealEngine\Engine\Binaries\Win64\UnrealEditor.exe' `
   -ArgumentList @(
-    'H:\Unreal\Workspace\test\test.uproject',
+    'H:\Unreal\Workspace\RenderPipelineLab\RenderPipelineLab.uproject',
     '-game', '-dx12', '-windowed', '-ResX=1280', '-ResY=720',
     '-log', '-AttachRenderDoc', '-Log=RenderDocLab.log'
   ) `
@@ -190,12 +190,12 @@ PIX 的普通 `attach <PID>` 只能连接由 PIX 启动并已安装 GPU Capture 
 
 ### 独立 Game Target 与部署包
 
-工程原始 Game Target 名为 `test`，会与当前 UBT 的测试命令关键字冲突，因此新增只负责启动的 `RenderPipelineLab.Target.cs`，运行时模块仍为 `test`。
+工程最初使用 `test` 作为项目和 Runtime Module 名称。当前工程已统一改名为 `RenderPipelineLab`，Game Target、Editor Target、`.uproject` 与 Runtime Module 使用同一名称。
 
 ```powershell
 & 'H:\Unreal\UnrealEngine\Engine\Build\BatchFiles\Build.bat' `
   RenderPipelineLab Win64 Development `
-  '-Project=H:\Unreal\Workspace\test\test.uproject' `
+  '-Project=H:\Unreal\Workspace\RenderPipelineLab\RenderPipelineLab.uproject' `
   -WaitMutex -NoHotReloadFromIDE
 ```
 
@@ -210,18 +210,18 @@ UE 5.8 默认开启 Zen Store。本机 Stage 时 Zen oplog 无法在 UnrealPak �
 
 ```powershell
 & 'H:\Unreal\UnrealEngine\Engine\Build\BatchFiles\RunUAT.bat' BuildCookRun `
-  '-project=H:\Unreal\Workspace\test\test.uproject' `
+  '-project=H:\Unreal\Workspace\RenderPipelineLab\RenderPipelineLab.uproject' `
   -noP4 -platform=Win64 -clientconfig=Development `
   -target=RenderPipelineLab -skipbuild -cook `
   '-map=/Engine/Maps/Entry' -stage -pak -archive `
-  '-archivedirectory=H:\Unreal\Workspace\test\Saved\StagedPIX' `
+  '-archivedirectory=H:\Unreal\Workspace\RenderPipelineLab\Saved\StagedPIX' `
   -utf8output
 ```
 
 部署程序：
 
 ```text
-H:\Unreal\Workspace\test\Saved\StagedPIX\Windows\test\Binaries\Win64\RenderPipelineLab.exe
+H:\Unreal\Workspace\RenderPipelineLab\Saved\StagedPIX\Windows\RenderPipelineLab\Binaries\Win64\RenderPipelineLab.exe
 ```
 
 直接启动该程序时，`DefaultGameUserSettings.ini` 将窗口模式设为 1280×1080，不需要额外传入 `-windowed`、`-ResX` 或 `-ResY`。分析工具需要固定其他捕获尺寸时，仍可通过命令行覆盖默认值；本节下方的实际 PIX 证据使用 1280×720。
@@ -234,10 +234,10 @@ H:\Unreal\Workspace\test\Saved\StagedPIX\Windows\test\Binaries\Win64\RenderPipel
 
 ```powershell
 $Pix = 'C:\Program Files\Microsoft PIX\2603.25\pixtool.exe'
-$Exe = 'H:\Unreal\Workspace\test\Saved\StagedPIX\Windows\test\Binaries\Win64\RenderPipelineLab.exe'
-$Capture = 'H:\Unreal\Workspace\test\Saved\Captures\PIX\StaticBox_20260824.wpix'
+$Exe = 'H:\Unreal\Workspace\RenderPipelineLab\Saved\StagedPIX\Windows\RenderPipelineLab\Binaries\Win64\RenderPipelineLab.exe'
+$Capture = 'H:\Unreal\Workspace\RenderPipelineLab\Saved\Captures\PIX\StaticBox_20260824.wpix'
 $PixArgs = '--output=verbose launch "' + $Exe + `
-  '" --working-directory="H:\Unreal\Workspace\test\Saved\StagedPIX\Windows"' + `
+  '" --working-directory="H:\Unreal\Workspace\RenderPipelineLab\Saved\StagedPIX\Windows"' + `
   ' --command-line="-dx12 -windowed -ResX=1280 -ResY=720 -pixautocapture -log -Log=PixCaptureLab.log"' + `
   ' programmatic-capture save-capture "' + $Capture + '"'
 
@@ -249,14 +249,14 @@ Start-Process -FilePath $Pix -ArgumentList $PixArgs `
 
 ```powershell
 & $Pix open-capture $Capture `
-  save-event-list 'H:\Unreal\Workspace\test\Saved\Captures\PIX\StaticBox_20260824.csv'
+  save-event-list 'H:\Unreal\Workspace\RenderPipelineLab\Saved\Captures\PIX\StaticBox_20260824.csv'
 
 & $Pix open-capture $Capture `
-  save-event-list 'H:\Unreal\Workspace\test\Saved\Captures\PIX\StaticBox_20260824_D3D.csv' `
+  save-event-list 'H:\Unreal\Workspace\RenderPipelineLab\Saved\Captures\PIX\StaticBox_20260824_D3D.csv' `
   '--counter-groups=D3D*'
 
 & $Pix open-capture $Capture `
-  save-resource 'H:\Unreal\Workspace\test\Saved\Captures\PIX\StaticBox_20260824_FinalColor.png'
+  save-resource 'H:\Unreal\Workspace\RenderPipelineLab\Saved\Captures\PIX\StaticBox_20260824_FinalColor.png'
 ```
 
 ### 实际捕获结果
@@ -289,13 +289,13 @@ H:\Unreal\UnrealEngine\Engine\Binaries\Win64\UnrealEditor.exe
 参数：
 
 ```text
-H:\Unreal\Workspace\test\test.uproject -game -dx12 -windowed -ResX=1280 -ResY=720 -log -Log=NsightRenderPipelineLab.log
+H:\Unreal\Workspace\RenderPipelineLab\RenderPipelineLab.uproject -game -dx12 -windowed -ResX=1280 -ResY=720 -log -Log=NsightRenderPipelineLab.log
 ```
 
 工作目录：
 
 ```text
-H:\Unreal\Workspace\test
+H:\Unreal\Workspace\RenderPipelineLab
 ```
 
 ### UI 操作步骤
@@ -324,15 +324,15 @@ Windows 防火墙权限弹窗或 `ngfx.exe` Qt 前端异常不影响 `ngfx-captu
 ```powershell
 & 'C:\Program Files\NVIDIA Corporation\Nsight Graphics 2026.3.1\host\windows-desktop-nomad-x64\ngfx-capture.exe' `
   --exe='H:\Unreal\UnrealEngine\Engine\Binaries\Win64\UnrealEditor.exe' `
-  --working-dir='H:\Unreal\Workspace\test' `
-  --output-file='H:\Unreal\Workspace\test\Saved\Captures\Nsight\StaticBox_Timer_20260824.nsight-gfx' `
+  --working-dir='H:\Unreal\Workspace\RenderPipelineLab' `
+  --output-file='H:\Unreal\Workspace\RenderPipelineLab\Saved\Captures\Nsight\StaticBox_Timer_20260824.nsight-gfx' `
   --capture-countdown-timer=15000 `
   --frame-count=1 `
   --terminate-after-capture `
   --disable-hang-detection `
   --no-block-on-interfering-application `
   --diagnostic-mode `
-  --args='H:\Unreal\Workspace\test\test.uproject -game -dx12 -windowed -ResX=1280 -ResY=720 -log -Log=NsightTimerLab.log'
+  --args='H:\Unreal\Workspace\RenderPipelineLab\RenderPipelineLab.uproject -game -dx12 -windowed -ResX=1280 -ResY=720 -log -Log=NsightTimerLab.log'
 ```
 
 实际捕获：
@@ -424,8 +424,8 @@ FD3D12Thread::Run
 
 ## 临时文件边界
 
-- RenderDoc：`H:\Unreal\Workspace\test\Saved\Captures\RenderDoc`
-- Nsight：`H:\Unreal\Workspace\test\Saved\Captures\Nsight`
-- PIX：`H:\Unreal\Workspace\test\Saved\Captures\PIX`
+- RenderDoc：`H:\Unreal\Workspace\RenderPipelineLab\Saved\Captures\RenderDoc`
+- Nsight：`H:\Unreal\Workspace\RenderPipelineLab\Saved\Captures\Nsight`
+- PIX：`H:\Unreal\Workspace\RenderPipelineLab\Saved\Captures\PIX`
 - 抓帧和工具缓存不复制到 `D:\IvanOneDriveCloud\ivan-ai-driven`
 - RenderDoc、Nsight 与 PIX 不在同一个 Demo 进程中共同 Hook

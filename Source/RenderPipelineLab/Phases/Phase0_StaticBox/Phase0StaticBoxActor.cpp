@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "RenderPipelineProbeActor.h"
+#include "Phases/Phase0_StaticBox/Phase0StaticBoxActor.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/DirectionalLightComponent.h"
@@ -11,11 +11,8 @@
 #include "InputCoreTypes.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInterface.h"
-#include "Misc/CommandLine.h"
-#include "TimerManager.h"
+#include "RenderPipelineLab.h"
 #include "UObject/ConstructorHelpers.h"
-
-DEFINE_LOG_CATEGORY(LogRenderPipelineProbe);
 
 namespace RenderPipelineProbe
 {
@@ -25,7 +22,7 @@ namespace RenderPipelineProbe
 	const FVector OffsetLocation(0.0, 150.0, 0.0);
 }
 
-ARenderPipelineProbeActor::ARenderPipelineProbeActor()
+APhase0StaticBoxActor::APhase0StaticBoxActor()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
@@ -57,7 +54,7 @@ ARenderPipelineProbeActor::ARenderPipelineProbeActor()
 	DirectionalLight->SetCastShadows(false);
 }
 
-void ARenderPipelineProbeActor::BeginPlay()
+void APhase0StaticBoxActor::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -65,8 +62,8 @@ void ARenderPipelineProbeActor::BeginPlay()
 		UGameplayStatics::GetPlayerController(this, 0);
 	if (!PlayerController)
 	{
-		UE_LOG(LogRenderPipelineProbe, Error,
-			TEXT("Stage=ReadyFailed Reason=NoPlayerController"));
+		UE_LOG(LogRenderPipelineLab, Error,
+			TEXT("Phase=Phase0 Stage=ReadyFailed Reason=NoPlayerController"));
 		return;
 	}
 
@@ -74,48 +71,26 @@ void ARenderPipelineProbeActor::BeginPlay()
 	EnableInput(PlayerController);
 	if (!InputComponent)
 	{
-		UE_LOG(LogRenderPipelineProbe, Error,
-			TEXT("Stage=ReadyFailed Reason=NoInputComponent"));
+		UE_LOG(LogRenderPipelineLab, Error,
+			TEXT("Phase=Phase0 Stage=ReadyFailed Reason=NoInputComponent"));
 		return;
 	}
 
 	InputComponent->BindKey(EKeys::One, IE_Pressed, this,
-		&ARenderPipelineProbeActor::ToggleProbeTransform);
+		&APhase0StaticBoxActor::ToggleProbeTransform);
 	InputComponent->BindKey(EKeys::Two, IE_Pressed, this,
-		&ARenderPipelineProbeActor::RebuildProbeRenderState);
+		&APhase0StaticBoxActor::RebuildProbeRenderState);
 	InputComponent->BindKey(EKeys::Three, IE_Pressed, this,
-		&ARenderPipelineProbeActor::DestroyProbeMesh);
+		&APhase0StaticBoxActor::DestroyProbeMesh);
 	InputComponent->BindKey(EKeys::Four, IE_Pressed, this,
-		&ARenderPipelineProbeActor::CreateProbeMesh);
+		&APhase0StaticBoxActor::CreateProbeMesh);
 
-	UE_LOG(LogRenderPipelineProbe, Display,
-		TEXT("Stage=Ready Component=%s"), *ProbeMesh->GetName());
-
-	if (FParse::Param(FCommandLine::Get(), TEXT("pixautocapture")))
-	{
-		GetWorldTimerManager().SetTimer(
-			PixCaptureTimer,
-			this,
-			&ARenderPipelineProbeActor::TriggerPixCapture,
-			5.0f,
-			false);
-		UE_LOG(LogRenderPipelineProbe, Display,
-			TEXT("Stage=PixCaptureScheduled DelaySeconds=5"));
-	}
+	UE_LOG(LogRenderPipelineLab, Display,
+		TEXT("Phase=Phase0 Stage=Ready Component=%s"), *ProbeMesh->GetName());
+	SchedulePixCaptureIfRequested();
 }
 
-void ARenderPipelineProbeActor::TriggerPixCapture()
-{
-	UE_LOG(LogRenderPipelineProbe, Display,
-		TEXT("Stage=PixCaptureRequested Command=pix.GpuCaptureFrame"));
-	if (!GEngine->Exec(GetWorld(), TEXT("pix.GpuCaptureFrame")))
-	{
-		UE_LOG(LogRenderPipelineProbe, Error,
-			TEXT("Stage=PixCaptureFailed Reason=CommandUnavailable"));
-	}
-}
-
-void ARenderPipelineProbeActor::ToggleProbeTransform()
+void APhase0StaticBoxActor::ToggleProbeTransform()
 {
 	if (!ProbeMesh)
 	{
@@ -127,39 +102,39 @@ void ARenderPipelineProbeActor::ToggleProbeTransform()
 		bProbeAtOffset
 			? RenderPipelineProbe::OffsetLocation
 			: RenderPipelineProbe::InitialLocation);
-	UE_LOG(LogRenderPipelineProbe, Display,
-		TEXT("Stage=Transform Component=%s Offset=%d"),
+	UE_LOG(LogRenderPipelineLab, Display,
+		TEXT("Phase=Phase0 Stage=Transform Component=%s Offset=%d"),
 		*ProbeMesh->GetName(),
 		bProbeAtOffset ? 1 : 0);
 }
 
-void ARenderPipelineProbeActor::RebuildProbeRenderState()
+void APhase0StaticBoxActor::RebuildProbeRenderState()
 {
 	if (!ProbeMesh)
 	{
 		return;
 	}
 
-	UE_LOG(LogRenderPipelineProbe, Display,
-		TEXT("Stage=RenderStateDirty Component=%s"),
+	UE_LOG(LogRenderPipelineLab, Display,
+		TEXT("Phase=Phase0 Stage=RenderStateDirty Component=%s"),
 		*ProbeMesh->GetName());
 	ProbeMesh->MarkRenderStateDirty();
 }
 
-void ARenderPipelineProbeActor::DestroyProbeMesh()
+void APhase0StaticBoxActor::DestroyProbeMesh()
 {
 	if (!ProbeMesh)
 	{
 		return;
 	}
 
-	UE_LOG(LogRenderPipelineProbe, Display,
-		TEXT("Stage=Destroy Component=%s"), *ProbeMesh->GetName());
+	UE_LOG(LogRenderPipelineLab, Display,
+		TEXT("Phase=Phase0 Stage=Destroy Component=%s"), *ProbeMesh->GetName());
 	ProbeMesh->DestroyComponent();
 	ProbeMesh = nullptr;
 }
 
-void ARenderPipelineProbeActor::CreateProbeMesh()
+void APhase0StaticBoxActor::CreateProbeMesh()
 {
 	if (ProbeMesh)
 	{
@@ -175,13 +150,13 @@ void ARenderPipelineProbeActor::CreateProbeMesh()
 	AddInstanceComponent(ProbeMesh);
 	ProbeMesh->RegisterComponent();
 	++ProbeGeneration;
-	UE_LOG(LogRenderPipelineProbe, Display,
-		TEXT("Stage=Create Component=%s Generation=%d"),
+	UE_LOG(LogRenderPipelineLab, Display,
+		TEXT("Phase=Phase0 Stage=Create Component=%s Generation=%d"),
 		*ProbeMesh->GetName(),
 		ProbeGeneration);
 }
 
-void ARenderPipelineProbeActor::ConfigureProbeMesh(
+void APhase0StaticBoxActor::ConfigureProbeMesh(
 	UStaticMeshComponent& MeshComponent)
 {
 	MeshComponent.SetupAttachment(SceneRoot);
