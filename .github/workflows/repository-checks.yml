@@ -1,0 +1,19 @@
+name: repository-checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - name: Validate tracked tree
+        shell: pwsh
+        run: ./Tools/ValidateRepository.ps1 -RepositoryRoot . -TrackedOnly -RequireProjectLayout
+      - name: Test validator
+        shell: pwsh
+        run: ./Tools/TestValidateRepository.ps1 -ValidatorPath ./Tools/ValidateRepository.ps1

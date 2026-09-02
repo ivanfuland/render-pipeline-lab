@@ -67,6 +67,47 @@ try {
     if ((Invoke-ValidatorProcess -Root $resolvedTemp) -eq 0) {
         throw 'Enabled AndroidFileServer fixture unexpectedly passed.'
     }
+
+    $layoutRoot = Join-Path $resolvedTemp 'LayoutFixture'
+    $requiredLayoutPaths = @(
+        'RenderPipelineLab.uproject',
+        '.github/workflows/repository-checks.yml',
+        'Source/RenderPipelineLab.Target.cs',
+        'Source/RenderPipelineLabEditor.Target.cs',
+        'Source/RenderPipelineLab/RenderPipelineLab.Build.cs',
+        'Source/RenderPipelineLab/Core/RenderPipelinePhaseRegistry.cpp',
+        'Source/RenderPipelineLab/Phases/Phase0_StaticBox/Phase0StaticBoxActor.cpp',
+        'Source/RenderPipelineLab/Phases/Phase1_DirectLighting/Phase1DirectLightingActor.cpp'
+    )
+
+    New-Item -ItemType Directory -Path $layoutRoot | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $layoutRoot 'Source') | Out-Null
+    if ((Invoke-ValidatorProcess -Root $layoutRoot -RequireProjectLayout) -eq 0) {
+        throw 'Incomplete project layout unexpectedly passed.'
+    }
+
+    foreach ($relativePath in $requiredLayoutPaths) {
+        $fullPath = Join-Path $layoutRoot $relativePath
+        $parent = Split-Path -Parent $fullPath
+        New-Item -ItemType Directory -Path $parent -Force | Out-Null
+        if ($relativePath -eq 'RenderPipelineLab.uproject') {
+            Set-Content -LiteralPath $fullPath -Value @'
+{
+  "FileVersion": 3,
+  "Plugins": [
+    { "Name": "AndroidFileServer", "Enabled": false }
+  ]
+}
+'@
+        }
+        else {
+            Set-Content -LiteralPath $fullPath -Value 'fixture'
+        }
+    }
+
+    if ((Invoke-ValidatorProcess -Root $layoutRoot -RequireProjectLayout) -ne 0) {
+        throw 'Complete project layout failed validation.'
+    }
 }
 finally {
     if (Test-Path -LiteralPath $resolvedTemp) {

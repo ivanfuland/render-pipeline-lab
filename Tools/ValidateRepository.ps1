@@ -1,7 +1,8 @@
 param(
     [Parameter(Mandatory = $true)]
     [string]$RepositoryRoot,
-    [switch]$TrackedOnly
+    [switch]$TrackedOnly,
+    [switch]$RequireProjectLayout
 )
 
 $root = [IO.Path]::GetFullPath($RepositoryRoot)
@@ -30,6 +31,25 @@ else {
 }
 
 $failures = [Collections.Generic.List[string]]::new()
+$requiredPaths = @(
+    'RenderPipelineLab.uproject',
+    '.github/workflows/repository-checks.yml',
+    'Source/RenderPipelineLab.Target.cs',
+    'Source/RenderPipelineLabEditor.Target.cs',
+    'Source/RenderPipelineLab/RenderPipelineLab.Build.cs',
+    'Source/RenderPipelineLab/Core/RenderPipelinePhaseRegistry.cpp',
+    'Source/RenderPipelineLab/Phases/Phase0_StaticBox/Phase0StaticBoxActor.cpp',
+    'Source/RenderPipelineLab/Phases/Phase1_DirectLighting/Phase1DirectLightingActor.cpp'
+)
+
+if ($RequireProjectLayout) {
+    foreach ($required in $requiredPaths) {
+        if (-not (Test-Path -LiteralPath (Join-Path $root $required) -PathType Leaf)) {
+            $failures.Add("Missing required path: $required")
+        }
+    }
+}
+
 foreach ($relative in $relativeFiles) {
     if ($relative -match '(^|/)\.git(/|$)') {
         continue
