@@ -912,9 +912,9 @@ namespace Phase1DirectLighting
     const FVector BoxLocation(0.0, 0.0, 50.0);
     const FVector BoxScale(1.0, 1.0, 1.0);
     const FVector SpotLocation(-300.0, 0.0, 400.0);
-    const FVector ReceiverTarget(50.0, 0.0, 1.0);
-    const FVector CameraLocation(-700.0, -700.0, 450.0);
-    const FVector CameraTarget(25.0, 0.0, 30.0);
+    const FVector ReceiverTarget(100.0, 0.0, 1.0);
+    const FVector CameraLocation(0.0, -900.0, 500.0);
+    const FVector CameraTarget(60.0, 0.0, 30.0);
     constexpr float CameraFov = 60.0f;
     constexpr float SpotIntensity = 5000.0f;
     constexpr float SpotRadius = 1500.0f;
@@ -1043,7 +1043,7 @@ sg.ShadingQuality=3
 sg.LandscapeQuality=3
 ```
 
-Implement a fixed array of required CVars and expected values. Log every value, including `sg.ResolutionQuality=100`. `r.ClusteredDeferredShading.EnableForProject` is record-only: Clustered Deferred is disabled by `r.UseClusteredDeferredShading_ToBeRemoved=0`, while the project-support CVar may remain `1`. If any other required CVar is missing or mismatched, log `Stage=ReadyFailed Reason=BaselineMismatch` and withhold readiness. Do not mutate read-only project CVars at runtime.
+Implement a fixed array of required CVars and expected values. Log every value. `sg.ResolutionQuality` is record-only and must match between evidence runs; UE5.8.1 uses `0` to select the project's default Screen Percentage. `r.ClusteredDeferredShading.EnableForProject` is also record-only: Clustered Deferred is disabled by `r.UseClusteredDeferredShading_ToBeRemoved=0`, while the project-support CVar may remain `1`. If any other required CVar is missing or mismatched, log `Stage=ReadyFailed Reason=BaselineMismatch` and withhold readiness. Do not mutate read-only project CVars at runtime.
 
 - [ ] **Step 7: Implement delayed fixed-target projection and readiness logging**
 
@@ -1183,12 +1183,12 @@ if ([string]::IsNullOrWhiteSpace($PixToolPath) -or
 }
 $pix = $PixToolPath
 $stageRoot = Join-Path $ProjectRoot 'Saved\StagedPIX'
-$executables = @(Get-ChildItem -LiteralPath $stageRoot -Recurse -File `
-    -Filter 'RenderPipelineLab.exe')
-if ($executables.Count -ne 1) {
-    throw "Expected one staged RenderPipelineLab.exe, found $($executables.Count)."
+$stageWindows = Join-Path $stageRoot 'Windows'
+$exe = Join-Path $stageWindows `
+    'RenderPipelineLab\Binaries\Win64\RenderPipelineLab.exe'
+if (-not (Test-Path -LiteralPath $exe -PathType Leaf)) {
+    throw "Current staged executable is missing: $exe"
 }
-$exe = $executables[0].FullName
 foreach ($mode in @('On','Off')) {
     $capture = Join-Path $ProjectRoot "Saved\Captures\PIX\Phase1_Shadow$mode.wpix"
     $commandLine = "-dx12 -windowed -ResX=1280 -ResY=1080 -RenderPipelinePhase=Phase1 -Phase1Shadow=$mode -pixautocapture -log"

@@ -311,7 +311,7 @@ sg.ShadingQuality
 sg.LandscapeQuality
 ```
 
-The Phase1 evidence baseline expects `sg.ResolutionQuality=100` and every other supported quality group above to report `3` (Epic). Missing groups are logged as missing and reviewed against the UE 5.8.1 platform configuration rather than treated as an implicit pass.
+The Phase1 evidence baseline records `sg.ResolutionQuality` and requires it to match between Shadow On and Off. UE5.8.1 uses `0` to select the project's default Screen Percentage, so `0` is not treated as Low quality. Every other supported quality group above must report `3` (Epic). Missing groups are logged as missing and reviewed against the UE 5.8.1 platform configuration rather than treated as an implicit pass.
 
 ## 10. Evidence workflow
 
