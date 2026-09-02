@@ -7,7 +7,7 @@ RenderPipelineLab 是一个 UE5.8.1 Renderer 实验工程。工程使用单一 `
 | Phase | 内容 | 状态 |
 |---|---|---|
 | Phase0 | 普通非 Nanite Box 从 Component 到 GPU Draw 的生命周期实验 | Build、Automation Test、D3D12 Ready 已验证 |
-| Phase1 | Box / Plane / Movable Spot Light 的 Standard Deferred 直接光实验 | Build、Automation Test、Shadow On/Off D3D12 Ready 已验证；PIX Capture 待完成 |
+| Phase1 | Box / Plane / Movable Spot Light 的 Standard Deferred 直接光实验 | Debug Build、Automation Test、Shadow On/Off D3D12 Ready 与 PIX 代表路径已验证；像素级中间值待补充 |
 
 ## 环境
 
@@ -26,10 +26,12 @@ $env:PIX_TOOL_PATH = 'C:\Program Files\Microsoft PIX\2603.25\pixtool.exe'
 
 ```powershell
 & "$env:UE_ENGINE_ROOT\Engine\Build\BatchFiles\Build.bat" `
-  RenderPipelineLabEditor Win64 Development `
+  RenderPipelineLab Win64 Debug `
   "$PWD\RenderPipelineLab.uproject" `
-  -WaitMutex -NoHotReloadFromIDE
+  -WaitMutex
 ```
+
+`RenderPipelineLab Win64 Debug` 是最终构建与原生断点验证目标。NullRHI Automation Test 使用 Unreal Editor 作为宿主；首次搭建测试环境时可额外构建 `RenderPipelineLabEditor Win64 Development`，但它不替代最终 Debug 构建。
 
 ## Automation Test
 

@@ -18,10 +18,12 @@
 
 ```powershell
 & 'H:\Unreal\UnrealEngine\Engine\Build\BatchFiles\Build.bat' `
-  RenderPipelineLabEditor Win64 Development `
+  RenderPipelineLab Win64 Debug `
   'H:\Unreal\Workspace\RenderPipelineLab\RenderPipelineLab.uproject' `
-  -WaitMutex -NoHotReloadFromIDE
+  -WaitMutex
 ```
+
+该命令是最终构建与原生断点验证目标。下方 Automation Test 使用 Unreal Editor 宿主；首次环境可按需额外构建 `RenderPipelineLabEditor Win64 Development`，但不以它作为最终构建验收。
 
 ```powershell
 & 'H:\Unreal\UnrealEngine\Engine\Binaries\Win64\UnrealEditor-Cmd.exe' `

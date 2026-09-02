@@ -1356,9 +1356,8 @@ Freshly run:
 ```text
 repository validator
 validator regression tests
-RenderPipelineLabEditor build
+RenderPipelineLab Win64 Debug build
 Project.RenderPipelineLab Automation Tests
-RenderPipelineLab Game build
 Phase0 smoke verification
 Phase1 Shadow On runtime verification
 Phase1 Shadow Off runtime verification

@@ -373,12 +373,12 @@ The existing PowerShell verifier is generalized to validate common settings and 
 ### 11.3 Build and runtime checks
 
 1. Generate project files.
-2. Build `RenderPipelineLabEditor Win64 Development`.
-3. Run `Project.RenderPipelineLab` Automation Tests under NullRHI where supported.
-4. Launch Phase0 and verify existing logs and actions.
-5. Launch Phase1 Shadow On and Shadow Off at 1280×1080.
-6. Validate both Phase1 logs, exact fixed target coordinates, and the runtime boundary.
-7. Build the `RenderPipelineLab` Game Target.
+2. Build `RenderPipelineLab Win64 Debug` as the final native-debugging target.
+3. Build `RenderPipelineLabEditor Win64 Development` only when the NullRHI Automation Test host is not already available.
+4. Run `Project.RenderPipelineLab` Automation Tests under NullRHI where supported.
+5. Launch Phase0 and verify existing logs and actions.
+6. Launch Phase1 Shadow On and Shadow Off at 1280×1080.
+7. Validate both Phase1 logs, exact fixed target coordinates, and the runtime boundary.
 8. Cook and stage only when required for PIX validation.
 9. Capture and inspect Shadow On and Shadow Off.
 
