@@ -67,6 +67,10 @@ bool FPhase1DirectLightingContractTest::RunTest(const FString& Parameters)
 		TEXT("Spot contact shadow"),
 		Actor->GetSpotLight()->ContactShadowLength,
 		0.0f);
+	TestEqual(
+		TEXT("Spot intensity avoids clipping the teaching scene"),
+		Actor->GetSpotLight()->Intensity,
+		300.0f);
 	TestNull(TEXT("Spot IES"), Actor->GetSpotLight()->IESTexture.Get());
 	TestNull(
 		TEXT("Spot light function"),
@@ -85,13 +89,46 @@ bool FPhase1DirectLightingContractTest::RunTest(const FString& Parameters)
 		Actor->GetSpotLight()->LightingChannels.bChannel2);
 	TestEqual(TEXT("Phase ID"), Actor->GetPhaseId(), FName(TEXT("Phase1")));
 
+	const FBoxSphereBounds BoxBounds =
+		Actor->GetBoxCaster()->GetStaticMesh()->GetBounds();
+	const FVector BoxLocation = Actor->GetBoxCaster()->GetRelativeLocation();
+	const FVector BoxScale = Actor->GetBoxCaster()->GetRelativeScale3D();
+	const FVector FrontFaceCenter = BoxLocation + FVector(
+		0.0,
+		-BoxBounds.BoxExtent.Y * BoxScale.Y,
+		0.0);
+	const FVector SurfaceToLight =
+		Actor->GetSpotLight()->GetRelativeLocation() - FrontFaceCenter;
+	const float CameraFacingNoL = FVector::DotProduct(
+		FVector(0.0, -1.0, 0.0),
+		SurfaceToLight.GetSafeNormal());
+	TestTrue(
+		TEXT("Camera-facing Box face receives direct light"),
+		CameraFacingNoL > 0.25f);
+
 	const float BoxMaxX =
-		Actor->GetBoxCaster()->GetRelativeLocation().X +
-		Actor->GetBoxCaster()->GetStaticMesh()->GetBounds().BoxExtent.X *
-		Actor->GetBoxCaster()->GetRelativeScale3D().X;
+		BoxLocation.X + BoxBounds.BoxExtent.X * BoxScale.X;
 	TestTrue(
 		TEXT("Receiver target extends beyond the Box footprint"),
 		APhase1DirectLightingActor::GetReceiverTargetWorldPosition().X > BoxMaxX);
+
+	const FVector BoxTopCenter = BoxLocation + FVector(
+		0.0,
+		0.0,
+		BoxBounds.BoxExtent.Z * BoxScale.Z);
+	const FVector LightLocation = Actor->GetSpotLight()->GetRelativeLocation();
+	const FVector ReceiverTarget =
+		APhase1DirectLightingActor::GetReceiverTargetWorldPosition();
+	const double ProjectionAlpha =
+		(ReceiverTarget.Z - LightLocation.Z) /
+		(BoxTopCenter.Z - LightLocation.Z);
+	const FVector ProjectedTopCenter = LightLocation +
+		ProjectionAlpha * (BoxTopCenter - LightLocation);
+	TestTrue(
+		TEXT("Receiver target stays near the projected Box shadow center"),
+		FVector2D::Distance(
+			FVector2D(ReceiverTarget.X, ReceiverTarget.Y),
+			FVector2D(ProjectedTopCenter.X, ProjectedTopCenter.Y)) < 15.0);
 
 	World->RemoveFromRoot();
 	World->DestroyWorld(false);

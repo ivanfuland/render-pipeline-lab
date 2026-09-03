@@ -4,6 +4,8 @@ param(
     [int]$TimeoutSeconds = 60
 )
 
+. (Join-Path $PSScriptRoot 'Phase1PixCaptureSupport.ps1')
+
 $stageWindows = Join-Path $ProjectRoot 'Saved\StagedPIX\Windows'
 $exe = Join-Path $stageWindows `
     'RenderPipelineLab\Binaries\Win64\RenderPipelineLab.exe'
@@ -44,14 +46,20 @@ foreach ($mode in @('On', 'Off')) {
         $iterations = [Math]::Max(1, $TimeoutSeconds * 2)
         for ($index = 0; $index -lt $iterations; ++$index) {
             if (Test-Path -LiteralPath $sourceCaptureRoot) {
-                $newCapture = Get-ChildItem -LiteralPath $sourceCaptureRoot `
+                $candidate = Get-ChildItem -LiteralPath $sourceCaptureRoot `
                     -File -Filter '*.wpix' |
                     Where-Object { -not $existingCapturePaths.ContainsKey($_.FullName) } |
                     Sort-Object LastWriteTime -Descending |
                     Select-Object -First 1
-            }
-            if ($newCapture) {
-                break
+                if ($candidate -and (Test-Path -LiteralPath $log -PathType Leaf)) {
+                    $currentLogContent = Get-Content -Raw -LiteralPath $log
+                    if (Test-Phase1PixCaptureComplete `
+                        -CapturePath $candidate.FullName `
+                        -LogContent $currentLogContent) {
+                        $newCapture = $candidate
+                        break
+                    }
+                }
             }
             if ($process.HasExited) {
                 break

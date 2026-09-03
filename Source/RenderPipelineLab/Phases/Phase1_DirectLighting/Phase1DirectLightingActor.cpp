@@ -23,12 +23,12 @@ namespace Phase1DirectLighting
 	const FVector PlaneScale(10.0, 10.0, 1.0);
 	const FVector BoxLocation(0.0, 0.0, 50.0);
 	const FVector BoxScale(1.0, 1.0, 1.0);
-	const FVector SpotLocation(-300.0, 0.0, 400.0);
-	const FVector ReceiverTarget(100.0, 0.0, 1.0);
+	const FVector SpotLocation(-300.0, -200.0, 400.0);
+	const FVector ReceiverTarget(100.0, 60.0, 1.0);
 	const FVector CameraLocation(0.0, -900.0, 500.0);
 	const FVector CameraTarget(60.0, 0.0, 30.0);
 	constexpr float CameraFov = 60.0f;
-	constexpr float SpotIntensity = 5000.0f;
+	constexpr float SpotIntensity = 300.0f;
 	constexpr float SpotRadius = 1500.0f;
 	constexpr float SpotInnerCone = 20.0f;
 	constexpr float SpotOuterCone = 35.0f;

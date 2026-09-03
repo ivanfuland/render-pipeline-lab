@@ -17,3 +17,6 @@ jobs:
       - name: Test validator
         shell: pwsh
         run: ./Tools/TestValidateRepository.ps1 -ValidatorPath ./Tools/ValidateRepository.ps1
+      - name: Test PIX capture completion guard
+        shell: pwsh
+        run: ./Tools/TestPhase1PixCaptureSupport.ps1

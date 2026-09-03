@@ -911,19 +911,19 @@ namespace Phase1DirectLighting
     const FVector PlaneScale(10.0, 10.0, 1.0);
     const FVector BoxLocation(0.0, 0.0, 50.0);
     const FVector BoxScale(1.0, 1.0, 1.0);
-    const FVector SpotLocation(-300.0, 0.0, 400.0);
-    const FVector ReceiverTarget(100.0, 0.0, 1.0);
+    const FVector SpotLocation(-300.0, -200.0, 400.0);
+    const FVector ReceiverTarget(100.0, 60.0, 1.0);
     const FVector CameraLocation(0.0, -900.0, 500.0);
     const FVector CameraTarget(60.0, 0.0, 30.0);
     constexpr float CameraFov = 60.0f;
-    constexpr float SpotIntensity = 5000.0f;
+    constexpr float SpotIntensity = 300.0f;
     constexpr float SpotRadius = 1500.0f;
     constexpr float SpotInnerCone = 20.0f;
     constexpr float SpotOuterCone = 35.0f;
 }
 ```
 
-These are initial pre-evidence constants. The visual smoke step may adjust them once; the final values must be frozen in source and `docs/phase1-direct-lighting.md` before PIX capture.
+These are the accepted post-smoke constants. They keep the Box readable, separate it from the Plane shadow, and place the receiver target near the projected shadow center. The values are frozen in source and `docs/phase1-direct-lighting.md` before PIX capture.
 
 - [ ] **Step 4: Implement the C++-created Phase1 scene**
 
