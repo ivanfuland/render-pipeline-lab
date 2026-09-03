@@ -20,3 +20,6 @@ jobs:
       - name: Test PIX capture completion guard
         shell: pwsh
         run: ./Tools/TestPhase1PixCaptureSupport.ps1
+      - name: Test debug profiles
+        shell: pwsh
+        run: ./Tools/TestDebugProfileSupport.ps1

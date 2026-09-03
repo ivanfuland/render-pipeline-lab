@@ -33,6 +33,55 @@ $env:PIX_TOOL_PATH = 'C:\Program Files\Microsoft PIX\2603.25\pixtool.exe'
 
 `RenderPipelineLab Win64 Debug` 是最终构建与原生断点验证目标。NullRHI Automation Test 使用 Unreal Editor 作为宿主；首次搭建测试环境时可额外构建 `RenderPipelineLabEditor Win64 Development`，但它不替代最终 Debug 构建。
 
+## 调试环境 Profile
+
+工程把 Debug 调试拆成两个独立环境，避免在 VS 的 `.vcxproj.user` 中反复切换路径：
+
+| Profile | 数据布局 | 用途 |
+|---|---|---|
+| Cooked Sandbox | `Saved/Cooked/Windows` loose files | 高频 C++、Renderer 断点迭代 |
+| Staged Debug | `Saved/StagedDebug/Windows` Pak / staged layout | 完整包体、配置、启动期和部署布局验证 |
+
+准备 Cooked Sandbox：
+
+```powershell
+./Tools/PrepareCookedSandbox.ps1 `
+  -ProjectRoot $PWD `
+  -EngineRoot $env:UE_ENGINE_ROOT `
+  -Iterative
+```
+
+只改 C++ 时可以跳过 Prepare，直接在 VS 构建 `Debug | x64`。修改材质、地图或 Shader 编译配置后再 Cook。
+
+启动 Cooked Sandbox：
+
+```powershell
+./Tools/StartCookedSandboxDebug.ps1 `
+  -ProjectRoot $PWD `
+  -Phase Phase1 `
+  -ShadowMode On
+```
+
+准备完整 Staged Debug：
+
+```powershell
+./Tools/PrepareStagedDebug.ps1 `
+  -ProjectRoot $PWD `
+  -EngineRoot $env:UE_ENGINE_ROOT
+```
+
+启动并等待 VS Attach：
+
+```powershell
+./Tools/StartStagedDebug.ps1 `
+  -ProjectRoot $PWD `
+  -Phase Phase1 `
+  -ShadowMode On `
+  -WaitForAttach
+```
+
+脚本会输出唯一 PID、EXE、Content Root 和当前 Profile 的实际日志路径。Cooked Sandbox 日志位于其 sandbox 内，Staged Debug 日志位于 staged project 的 `Saved/Logs`。VS 的 F5 保留给 Cooked Sandbox；Staged Debug 使用 `-WaitForAttach` 后从 `Debug → Attach to Process` 连接。Development `Saved/StagedPIX` 继续只用于 GPU Capture 与性能基线。
+
 ## Automation Test
 
 ```powershell
