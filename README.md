@@ -42,30 +42,64 @@ $env:PIX_TOOL_PATH = 'C:\Program Files\Microsoft PIX\2603.25\pixtool.exe'
 | Cooked Sandbox | `Saved/Cooked/Windows` loose files | 高频 C++、Renderer 断点迭代 |
 | Staged Debug | `Saved/StagedDebug/Windows` Pak / staged layout | 完整包体、配置、启动期和部署布局验证 |
 
+两个 Debug 环境共用两种调试方式：
+
+| DebugMode | 主要参数 | 用途 |
+|---|---|---|
+| `ControlFlow` | `-onethread -norhithread` | 只观察函数顺序和局部变量，不记录真实线程归属 |
+| `ThreadBoundary` | `-noperfthreads` + 目标链路 CVar | 保留 GT、RT、RHI 职责边界，减少 Worker 跳转 |
+
+`ThreadBoundary` 是默认模式。Debug 专用 CVar 由启动脚本通过本次进程的 `-ExecCmds` 注入，不写入 `DefaultEngine.ini`，因此不会进入 Staged PIX Development 性能基线。
+
+调试参数的唯一事实源是 `Tools/Scripts/DebugProfileSupport.ps1`。`Tools/Scripts/SyncVsDebugProfile.ps1` 使用同一函数生成 VS `Debug | x64` 的 `.vcxproj.user` 参数；该文件是忽略入库的本机副本，不手工维护。
+
 准备 Cooked Sandbox：
 
 ```powershell
-./Tools/PrepareCookedSandbox.ps1 `
+./Tools/Scripts/PrepareCookedSandbox.ps1 `
   -ProjectRoot $PWD `
   -EngineRoot $env:UE_ENGINE_ROOT `
   -Iterative
 ```
+
+Prepare 完成后会自动把默认 `ThreadBoundary / Phase1 / Shadow On` 同步到 VS。重新生成 Visual Studio 工程文件后，也可以单独执行：
+
+```powershell
+./Tools/Scripts/SyncVsDebugProfile.ps1 `
+  -ProjectRoot $PWD `
+  -Phase Phase1 `
+  -ShadowMode On `
+  -DebugMode ThreadBoundary
+```
+
+Visual Studio 已打开时，执行同步后重新加载 RenderPipelineLab 项目或重开 Solution。
 
 只改 C++ 时可以跳过 Prepare，直接在 VS 构建 `Debug | x64`。修改材质、地图或 Shader 编译配置后再 Cook。
 
 启动 Cooked Sandbox：
 
 ```powershell
-./Tools/StartCookedSandboxDebug.ps1 `
+./Tools/Scripts/StartCookedSandboxDebug.ps1 `
   -ProjectRoot $PWD `
   -Phase Phase1 `
-  -ShadowMode On
+  -ShadowMode On `
+  -DebugMode ThreadBoundary
+```
+
+只需要连续观察函数顺序时改用：
+
+```powershell
+./Tools/Scripts/StartCookedSandboxDebug.ps1 `
+  -ProjectRoot $PWD `
+  -Phase Phase1 `
+  -ShadowMode On `
+  -DebugMode ControlFlow
 ```
 
 准备完整 Staged Debug：
 
 ```powershell
-./Tools/PrepareStagedDebug.ps1 `
+./Tools/Scripts/PrepareStagedDebug.ps1 `
   -ProjectRoot $PWD `
   -EngineRoot $env:UE_ENGINE_ROOT
 ```
@@ -73,14 +107,45 @@ $env:PIX_TOOL_PATH = 'C:\Program Files\Microsoft PIX\2603.25\pixtool.exe'
 启动并等待 VS Attach：
 
 ```powershell
-./Tools/StartStagedDebug.ps1 `
+./Tools/Scripts/StartStagedDebug.ps1 `
   -ProjectRoot $PWD `
   -Phase Phase1 `
   -ShadowMode On `
+  -DebugMode ThreadBoundary `
   -WaitForAttach
 ```
 
-脚本会输出唯一 PID、EXE、Content Root 和当前 Profile 的实际日志路径。Cooked Sandbox 日志位于其 sandbox 内，Staged Debug 日志位于 staged project 的 `Saved/Logs`。VS 的 F5 保留给 Cooked Sandbox；Staged Debug 使用 `-WaitForAttach` 后从 `Debug → Attach to Process` 连接。Development `Saved/StagedPIX` 继续只用于 GPU Capture 与性能基线。
+脚本会输出 DebugMode、唯一 PID、EXE、Content Root 和当前 Profile 的实际日志路径。Cooked Sandbox 日志位于其 sandbox 内，Staged Debug 日志位于 staged project 的 `Saved/Logs`。VS 的 F5 保留给 Cooked Sandbox `ThreadBoundary`；Staged Debug 使用 `-WaitForAttach` 后从 `Debug → Attach to Process` 连接。Development `Saved/StagedPIX` 不注入 DebugMode CVar，只用于 GPU Capture 与性能基线。
+
+调整公共参数或 DebugMode 时只修改 `Tools/Scripts/DebugProfileSupport.ps1`，随后运行 `Tools/Scripts/SyncVsDebugProfile.ps1`。启动脚本与 VS F5 均由该事实源生成参数。
+
+## BAT 快捷入口
+
+BAT 入口放在 `Tools/`，PowerShell 实现统一放在 `Tools/Scripts/`：
+
+| BAT | 用途 |
+|---|---|
+| `StartCookedSandboxDebug.bat` | 启动 Cooked Sandbox Debug |
+| `StartStagedDebug.bat` | 启动 Staged Debug 并等待 VS Attach |
+| `PrepareCookedSandbox.bat` | Build Debug、增量 Cook，并同步 VS F5 |
+| `PrepareStagedDebug.bat` | Build/Cook/Stage/Pak Staged Debug |
+| `SyncVsDebugProfile.bat` | 只同步 VS `Debug | x64` 参数 |
+
+启动和同步 BAT 接收三个可选位置参数：
+
+```text
+DebugMode Phase ShadowMode
+```
+
+不传参数时使用 `ThreadBoundary Phase1 On`。示例：
+
+```bat
+Tools\StartCookedSandboxDebug.bat ControlFlow Phase1 On
+Tools\StartStagedDebug.bat ThreadBoundary Phase1 On
+Tools\SyncVsDebugProfile.bat ThreadBoundary Phase1 Off
+```
+
+Prepare BAT 从 `%UE_ENGINE_ROOT%` 读取引擎路径。BAT 只转发参数给对应 `.ps1`，不保存 CVar；PowerShell 失败时返回相同错误码并暂停显示错误。
 
 ## Automation Test
 
@@ -99,18 +164,18 @@ Debug Game 使用实验专用 Player Controller：鼠标指针保持可见，Vie
 ## 运行 Phase
 
 ```powershell
-./Tools/RunRenderPipelinePhase.ps1 `
+./Tools/Scripts/RunRenderPipelinePhase.ps1 `
   -ProjectRoot $PWD `
   -Phase Phase0
 ```
 
 ```powershell
-./Tools/RunRenderPipelinePhase.ps1 `
+./Tools/Scripts/RunRenderPipelinePhase.ps1 `
   -ProjectRoot $PWD `
   -Phase Phase1 `
   -ShadowMode On
 
-./Tools/RunRenderPipelinePhase.ps1 `
+./Tools/Scripts/RunRenderPipelinePhase.ps1 `
   -ProjectRoot $PWD `
   -Phase Phase1 `
   -ShadowMode Off

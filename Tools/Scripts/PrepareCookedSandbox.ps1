@@ -43,5 +43,16 @@ if (-not (Test-Path -LiteralPath $debugExe -PathType Leaf) -or
     throw 'Cooked Sandbox output is incomplete.'
 }
 
+$syncVsProfile = Join-Path $PSScriptRoot 'SyncVsDebugProfile.ps1'
+$vsUserFile = Join-Path $root `
+    'Intermediate\ProjectFiles\RenderPipelineLab.vcxproj.user'
+if (Test-Path -LiteralPath $vsUserFile -PathType Leaf) {
+    & $syncVsProfile -ProjectRoot $root `
+        -Phase Phase1 -ShadowMode On -DebugMode ThreadBoundary
+}
+else {
+    Write-Warning "VS user file is missing; regenerate project files and run SyncVsDebugProfile.ps1: $vsUserFile"
+}
+
 Write-Output "DebugExecutable=$debugExe"
 Write-Output "CookedSandbox=$cookedRoot"

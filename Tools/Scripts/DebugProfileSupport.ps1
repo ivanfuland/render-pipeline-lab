@@ -4,6 +4,8 @@ function Get-RenderPipelineDebugArguments {
         [string]$Phase = 'Phase0',
         [ValidateSet('On', 'Off')]
         [string]$ShadowMode = 'On',
+        [ValidateSet('ControlFlow', 'ThreadBoundary')]
+        [string]$DebugMode = 'ThreadBoundary',
         [Parameter(Mandatory = $true)]
         [string]$LogName,
         [switch]$WaitForAttach
@@ -24,6 +26,19 @@ function Get-RenderPipelineDebugArguments {
     }
     if ($WaitForAttach) {
         $arguments += '-waitforattach'
+    }
+    if ($DebugMode -eq 'ControlFlow') {
+        $arguments += @(
+            '-onethread',
+            '-norhithread',
+            '-ExecCmds="t.MaxFPS 5"'
+        )
+    }
+    else {
+        $arguments += @(
+            '-noperfthreads',
+            '-ExecCmds="r.Visibility.TaskSchedule 0,r.Visibility.DynamicMeshElements.NumMainViewTasks 0,r.MeshDrawCommands.ParallelPassSetup 0,r.ParallelBasePass 0,r.RHICmd.ParallelTranslate.Enable 0,r.OneFrameThreadLag 0,t.MaxFPS 5"'
+        )
     }
     return $arguments
 }

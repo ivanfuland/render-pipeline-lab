@@ -5,6 +5,8 @@ param(
     [string]$Phase = 'Phase0',
     [ValidateSet('On', 'Off')]
     [string]$ShadowMode = 'On',
+    [ValidateSet('ControlFlow', 'ThreadBoundary')]
+    [string]$DebugMode = 'ThreadBoundary',
     [switch]$WaitForAttach
 )
 
@@ -28,11 +30,13 @@ New-Item -ItemType Directory -Path $logRoot -Force | Out-Null
 
 $arguments = @(Get-RenderPipelineDebugArguments `
     -Phase $Phase -ShadowMode $ShadowMode -LogName $logName `
+    -DebugMode $DebugMode `
     -WaitForAttach:$WaitForAttach)
 $process = Start-Process -FilePath $exe -WorkingDirectory $root `
     -ArgumentList $arguments -WindowStyle Normal -PassThru
 
 Write-Output "Profile=CookedSandbox"
+Write-Output "DebugMode=$DebugMode"
 Write-Output "ProcessId=$($process.Id)"
 Write-Output "Executable=$exe"
 Write-Output "ContentRoot=$cookedRoot"

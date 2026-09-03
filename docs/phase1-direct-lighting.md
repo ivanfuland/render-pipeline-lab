@@ -29,13 +29,13 @@ Spot Light 使用默认 Lighting Channel。IES、Light Function、Contact Shadow
 ## 运行
 
 ```powershell
-./Tools/RunRenderPipelinePhase.ps1 `
+./Tools/Scripts/RunRenderPipelinePhase.ps1 `
   -ProjectRoot $PWD `
   -Phase Phase1 `
   -ShadowMode On `
   -LogName Phase1ShadowOn.log
 
-./Tools/RunRenderPipelinePhase.ps1 `
+./Tools/Scripts/RunRenderPipelinePhase.ps1 `
   -ProjectRoot $PWD `
   -Phase Phase1 `
   -ShadowMode Off `

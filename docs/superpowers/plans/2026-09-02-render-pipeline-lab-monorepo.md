@@ -2,6 +2,8 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+> **Historical path note:** This plan records the repository layout used during the original implementation. The current layout stores BAT entry points in `Tools/` and PowerShell implementations/tests in `Tools/Scripts/`; commands below that reference `Tools/*.ps1` are historical, not current operational instructions. Use the root `README.md` for current commands.
+
 **Goal:** Rename the existing UE 5.8.1 `test` project to `RenderPipelineLab`, add a single-project Phase Registry, preserve the white Box experiment as Phase0, implement the `060` Direct Lighting experiment as Phase1, and publish the verified source to `ivanfuland/render-pipeline-lab`.
 
 **Architecture:** One `.uproject` and one Runtime Module host multiple C++-created experiment Actors selected by `-RenderPipelinePhase=Phase0|Phase1`. Phase0 preserves the existing component lifecycle probe; Phase1 creates the fixed Box/Plane/Movable Spot Light/Camera scene and uses separate Shadow On/Off processes. Git tracks reproducible inputs only; local UE builds and GPU captures are verification gates and never enter Git.

@@ -13,13 +13,16 @@ jobs:
           lfs: false
       - name: Validate tracked tree
         shell: pwsh
-        run: ./Tools/ValidateRepository.ps1 -RepositoryRoot . -TrackedOnly -RequireProjectLayout
+        run: ./Tools/Scripts/ValidateRepository.ps1 -RepositoryRoot . -TrackedOnly -RequireProjectLayout
       - name: Test validator
         shell: pwsh
-        run: ./Tools/TestValidateRepository.ps1 -ValidatorPath ./Tools/ValidateRepository.ps1
+        run: ./Tools/Scripts/TestValidateRepository.ps1 -ValidatorPath ./Tools/Scripts/ValidateRepository.ps1
       - name: Test PIX capture completion guard
         shell: pwsh
-        run: ./Tools/TestPhase1PixCaptureSupport.ps1
+        run: ./Tools/Scripts/TestPhase1PixCaptureSupport.ps1
       - name: Test debug profiles
         shell: pwsh
-        run: ./Tools/TestDebugProfileSupport.ps1
+        run: ./Tools/Scripts/TestDebugProfileSupport.ps1
+      - name: Test debug launchers
+        shell: pwsh
+        run: ./Tools/Scripts/TestDebugLaunchers.ps1

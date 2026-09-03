@@ -66,7 +66,7 @@ $DemoProcess.Id
 基线检查：
 
 ```powershell
-& 'H:\Unreal\Workspace\RenderPipelineLab\Tools\VerifyRenderPipelineBaseline.ps1' `
+& 'H:\Unreal\Workspace\RenderPipelineLab\Tools\Scripts\VerifyRenderPipelineBaseline.ps1' `
   -ProjectRoot 'H:\Unreal\Workspace\RenderPipelineLab' `
   -LogPath 'H:\Unreal\Workspace\RenderPipelineLab\Saved\Logs\RenderPipelineLab.log'
 ```
